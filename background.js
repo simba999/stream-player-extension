@@ -21,38 +21,23 @@ function startTimer(startTime) {
 	if (audio && timer) {
 		audio.play();
 		audioStart = 1;
-		
 		var port = chrome.runtime.connect({
 		    name: "Sample Communication"
 		});
-
-
-		var timeList = startTime.split(':');
-		timeList = timeList.reverse().map((item) => {
-		  return parseInt(item);
-		})
-
-		timeList = [0, ...timeList, 0];
-
-		timer.start({callback: function (newTimer) {
-			time = newTimer.getTimeValues().toString(['hours', 'minutes', 'seconds']);
-		}});
-
-		port.postMessage({ type: 'startTime', time: startTime });
+		port.postMessage({ type: 'startTime', audio: 0 });
 	}
 }
 
 function pauseTimer() {
 	if (audio) {
 		audio.pause();
-		timer.pause();
 		audioStart = 0;
 
 		var port = chrome.runtime.connect({
 		    name: "Sample Communication"
 		});
 
-		port.postMessage({ type: 'pauseTime', time: time });
+		port.postMessage({ type: 'pauseTime', audio: 1 });
 	}
 }
 
@@ -64,10 +49,6 @@ function sendTime() {
 
 	if (audioStart) {
 		params.audio = 1;
-	}
-
-	if (audio.muted) {
-		params.muted = 1;
 	}
 
 	port.postMessage(params);
@@ -86,6 +67,7 @@ function changeVolume(type) {
 chrome.runtime.onConnect.addListener(function(port) {
 	
 	port.onMessage.addListener(function(msg) {
+		console.log('back: ', msg)
 		switch (msg.type) {
 			case "play_":
 				startTimer(msg.time);
