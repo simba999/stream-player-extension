@@ -27,7 +27,14 @@ function startTimer(startTime) {
 		});
 
 
-		var timeList = startTime.split(':');
+		var timeList = null;
+
+		if (audioStart) {
+			timeList = time.split(':');
+		} else {
+			timeList = startTime.split(':');
+		}
+
 		timeList = timeList.reverse().map((item) => {
 		  return parseInt(item);
 		})
@@ -38,7 +45,7 @@ function startTimer(startTime) {
 			time = newTimer.getTimeValues().toString(['hours', 'minutes', 'seconds']);
 		}});
 
-		port.postMessage({ type: 'startTime', time: startTime });
+		port.postMessage({ type: 'startTime', time: time });
 	}
 }
 
@@ -60,14 +67,20 @@ function sendTime() {
 	var port = chrome.runtime.connect({
 	    name: "Sample Communication"
 	});
-	var params = { type: 'sendTime', time: time, audio: 0, muted: 0 };
+	var params = { type: 'sendTime', time: time };
 
-	if (audioStart) {
-		params.audio = 1;
-	}
+	if (audio) {
+		if (audioStart) {
+			params.audio = 1;
+		} else {
+			params.audio = 0;
+		}
 
-	if (audio.muted) {
-		params.muted = 1;
+		if (audio.muted) {
+			params.muted = 1;
+		} else {
+			params.muted = 0;
+		}
 	}
 
 	port.postMessage(params);
